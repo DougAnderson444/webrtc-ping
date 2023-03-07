@@ -1,0 +1,29 @@
+[package]
+name = "ping-server"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.69"
+futures = "0.3.26"
+rand = "0.8.5"
+void = "1.0.2"
+tokio = { version = "1.19", features = ["full"] }
+libp2p-swarm = "0.42.0" # for NetworkBehaviour trait
+
+[dependencies.libp2p]
+version = "0.51"
+features = [
+    "async-std", # for libp2p-swarm/async-std
+    # "floodsub",
+    "macros", # for libp2p-swarm/macros
+    "mplex",
+    # "noise",
+    # "tcp",
+    "tokio", # for libp2p-swarm/tokio, libp2p-webrtc?/tokio
+    # "websocket",
+    "ping",
+    "webrtc"
+    ]
