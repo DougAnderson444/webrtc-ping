@@ -12,6 +12,7 @@ rand = "0.8.5"
 void = "1.0.2"
 tokio = { version = "1.19", features = ["full"] }
 libp2p-swarm = "0.42.0" # for NetworkBehaviour trait
+env_logger = "0.10.0"
 
 [dependencies.libp2p]
 version = "0.51"
