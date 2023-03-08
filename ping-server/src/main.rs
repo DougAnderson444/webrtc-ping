@@ -17,6 +17,9 @@ use void::Void;
 /// An example WebRTC server that will accept connections and run the ping protocol on them.
 #[tokio::main]
 async fn main() -> Result<()> {
+    // set up logging
+    env_logger::init();
+
     let mut swarm = create_swarm()?;
 
     let address = Multiaddr::from(Ipv6Addr::UNSPECIFIED)
