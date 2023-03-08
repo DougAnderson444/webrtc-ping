@@ -11,6 +11,8 @@ main()
 
 async function main() {
     let stream
+    let pingIntervalID
+
     const output = document.getElementById("output")
     const sendSection = document.getElementById("send-section")
     const appendOutput = (line) => {
@@ -21,16 +23,16 @@ async function main() {
     const clean = (line) => line.replaceAll("\n", "")
     const sender = pushable()
 
-    const node = await createLibp2p({
+    const libp2p = await createLibp2p({
         transports: [webRTC()],
         connectionEncryption: [noise()],
     })
 
-    await node.start()
+    await libp2p.start()
 
-    node.connectionManager.addEventListener("peer:connect", (connection) => {
+    libp2p.connectionManager.addEventListener("peer:connect", (connection) => {
         appendOutput(
-            `Peer connected '${node
+            `Peer connected '${libp2p
                 .getConnections()
                 .map((c) => c.remoteAddr.toString())}'`
         )
@@ -40,13 +42,21 @@ async function main() {
     window.connect.onclick = async () => {
         const ma = multiaddr(window.peer.value)
         appendOutput(`Dialing '${ma}'`)
-        stream = await node.dialProtocol(ma, ["/ipfs/ping/1.0.0"])
+        stream = await libp2p.dialProtocol(ma, ["/ipfs/ping/1.0.0"]) // , "/floodsub/1.0.0"
         pipe(sender, stream, async (src) => {
             for await (const buf of src) {
                 const response = toString(buf.subarray())
                 appendOutput(`Received message '${clean(response)}'`)
             }
         })
+
+        // also ping the Server
+        const doPing = async () => {
+            const latency = await libp2p.ping(ma)
+            console.log({ latency })
+        }
+        doPing()
+        pingIntervalID = setInterval(doPing, 30000)
     }
 
     window.send.onclick = async () => {

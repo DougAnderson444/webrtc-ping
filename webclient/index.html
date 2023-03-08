@@ -4,21 +4,41 @@
         <meta charset="UTF-8" />
         <link rel="icon" type="image/svg+xml" href="/vite.svg" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="style.css" />
         <title>Vite App</title>
     </head>
     <body>
-        <div id="app">
-            <div>
+        <div id="app" class="m-4">
+            <div class="flex flex-col items-center">
                 <label for="peer">Server MultiAddress:</label>
-                <input type="text" id="peer" />
-                <button id="connect">Connect</button>
+                <input
+                    type="text"
+                    id="peer"
+                    class="flex-1 border p-3 mx-2 rounded font-mono text-xs"
+                />
+                <button
+                    id="connect"
+                    class="flex-initial m-4 border bg-green-500 rounded outline-none text-white p-2 mx-2"
+                >
+                    Connect
+                </button>
             </div>
-            <div id="send-section">
+            <div id="send-section" class="flex">
                 <label for="message">Message:</label>
-                <input type="text" id="message" value="hello" />
-                <button id="send">Send</button>
+                <input
+                    type="text"
+                    id="message"
+                    value="hello"
+                    class="flex-1 border p-2 mx-2 rounded font-mono text-xs"
+                />
+                <button
+                    id="send"
+                    class="flex-initial border bg-green-500 rounded outline-none text-white p-2 mx-2"
+                >
+                    Send
+                </button>
             </div>
-            <div id="output"></div>
+            <div id="output" />
         </div>
         <script type="module" src="/main.js"></script>
     </body>
