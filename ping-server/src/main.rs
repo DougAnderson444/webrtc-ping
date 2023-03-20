@@ -6,12 +6,13 @@ use libp2p::{
     core::muxing::StreamMuxerBox,
     identity,
     multiaddr::{Multiaddr, Protocol},
-    ping,
-    swarm::{keep_alive, NetworkBehaviour, Swarm, SwarmEvent},
+    ping::{self, Config},
+    swarm::{keep_alive, NetworkBehaviour, SwarmBuilder, SwarmEvent},
     webrtc, Transport,
 };
 use rand::thread_rng;
 use std::net::Ipv6Addr;
+use std::time::Duration;
 use void::Void;
 
 /// An example WebRTC server that will accept connections and run the ping protocol on them.
@@ -20,7 +21,25 @@ async fn main() -> Result<()> {
     // set up logging
     env_logger::init();
 
-    let mut swarm = create_swarm()?;
+    let mut swarm = {
+        let id_keys = identity::Keypair::generate_ed25519();
+        let peer_id = id_keys.public().to_peer_id();
+        let transport = webrtc::tokio::Transport::new(
+            id_keys,
+            webrtc::tokio::Certificate::generate(&mut thread_rng())?,
+        );
+
+        let transport = transport
+            .map(|(peer_id, conn), _| (peer_id, StreamMuxerBox::new(conn)))
+            .boxed();
+
+        let behaviour = Behaviour {
+            ping: ping::Behaviour::new(Config::new().with_interval(Duration::new(1, 0))),
+            keep_alive: keep_alive::Behaviour::default(),
+        };
+
+        SwarmBuilder::with_tokio_executor(transport, behaviour, peer_id).build()
+    };
 
     let address = Multiaddr::from(Ipv6Addr::UNSPECIFIED)
         .with(Protocol::Udp(42069))
@@ -38,34 +57,29 @@ async fn main() -> Result<()> {
                         .with(Protocol::P2p(*swarm.local_peer_id().as_ref()))
                         .to_string();
 
-                    eprintln!("\nConnect with: \n{full_address}\n");
+                    eprintln!("\nConnect with: \n\x1b[30;1;42m{full_address}\x1b[0m\n");
                 }
+            }
+            SwarmEvent::Behaviour(Event::Ping(ping::Event {
+                peer,
+                result: Ok(ping::Success::Ping { rtt }),
+            })) => {
+                let id = peer.to_string().to_owned();
+                eprintln!("🏐 Pinged {id} ({rtt:?})")
+            }
+            SwarmEvent::Behaviour(Event::Ping(ping::Event {
+                peer,
+                result: Ok(ping::Success::Pong),
+            })) => {
+                let id = peer.to_string().to_owned();
+                eprintln!("🏓 Ponged by {id}")
             }
             event => eprintln!("🎇  Event: {event:?}\n"),
         }
     }
 }
 
-fn create_swarm() -> Result<Swarm<Behaviour>> {
-    let id_keys = identity::Keypair::generate_ed25519();
-    let peer_id = id_keys.public().to_peer_id();
-    let transport = webrtc::tokio::Transport::new(
-        id_keys,
-        webrtc::tokio::Certificate::generate(&mut thread_rng())?,
-    );
-
-    let transport = transport
-        .map(|(peer_id, conn), _| (peer_id, StreamMuxerBox::new(conn)))
-        .boxed();
-
-    Ok(Swarm::with_tokio_executor(
-        transport,
-        Behaviour::default(),
-        peer_id,
-    ))
-}
-
-#[derive(NetworkBehaviour, Default)]
+#[derive(NetworkBehaviour)]
 #[behaviour(
     out_event = "Event",
     event_process = false,

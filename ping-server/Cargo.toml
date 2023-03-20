@@ -15,16 +15,13 @@ libp2p-swarm = "0.42.0" # for NetworkBehaviour trait
 env_logger = "0.10.0"
 
 [dependencies.libp2p]
-version = "0.51"
+version = "0.51.1"
 features = [
-    "async-std", # for libp2p-swarm/async-std
-    # "floodsub",
-    "macros", # for libp2p-swarm/macros
-    "mplex",
-    # "noise",
-    # "tcp",
-    "tokio", # for libp2p-swarm/tokio, libp2p-webrtc?/tokio
-    # "websocket",
+    "gossipsub",
+    "identify",
+    "macros",
+    "noise",
+    "tokio",
     "ping",
     "webrtc"
     ]

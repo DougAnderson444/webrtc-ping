@@ -56,7 +56,7 @@ async function main() {
             console.log({ latency })
         }
         doPing()
-        pingIntervalID = setInterval(doPing, 30000)
+        pingIntervalID = setInterval(doPing, 5000)
     }
 
     window.send.onclick = async () => {
