@@ -36,7 +36,7 @@ async function main() {
                 .getConnections()
                 .map((c) => c.remoteAddr.toString())}'`
         )
-        sendSection.style.display = "block"
+        // sendSection.style.display = "block"
     })
 
     window.connect.onclick = async () => {
